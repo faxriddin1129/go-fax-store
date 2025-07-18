@@ -8,5 +8,6 @@ import (
 func MainRoutes(r *gin.Engine) {
 
 	r.GET("/", controllers.Welcome)
+	r.POST("/store", controllers.StoreFile)
 
 }
