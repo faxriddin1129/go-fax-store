@@ -24,8 +24,8 @@ func StoreFile(c *gin.Context) {
 		return
 	}
 
-	const maxSize = 1 * 1024 * 1024
-	allowedExtensions := []string{"jpg", "jpeg", "pdf", "webp", "png"}
+	const maxSize = 10 * 1024 * 1024
+	allowedExtensions := []string{"jpg", "jpeg", "pdf", "webp", "png", "xlsx", "svg", "doc", "docx"}
 
 	if file.Size > maxSize {
 		utils.RespondJson(c, nil, 413, "File size must not exceed 10MB.")
@@ -34,13 +34,7 @@ func StoreFile(c *gin.Context) {
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	ext = strings.TrimPrefix(ext, ".")
-	allowed := false
-	for _, a := range allowedExtensions {
-		if ext == a {
-			allowed = true
-			break
-		}
-	}
+	allowed := utils.InArray(allowedExtensions, ext)
 	if !allowed {
 		utils.RespondJson(c, nil, 415, "Unsupported file format")
 		return
