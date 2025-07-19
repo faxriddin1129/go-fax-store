@@ -1,4 +1,4 @@
-# ASIALUXE BILLING ````GOFAX````
+# GOFAX ````STORE````
 
 ### USE
 ```
