@@ -77,7 +77,7 @@
             gap: 20px;
         }
 
-        .folder-card, .file-card {
+        .folder-card {
             background: rgba(255,255,255,0.95);
             border-radius: 20px;
             padding: 25px;
@@ -90,7 +90,7 @@
             overflow: hidden;
         }
 
-        .folder-card:hover, .file-card:hover {
+        .folder-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.2);
         }
@@ -105,27 +105,13 @@
             background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
         }
 
-        .file-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
-        }
-
-        .folder-icon, .file-icon {
+        .folder-icon {
             font-size: 3rem;
             margin-bottom: 15px;
             color: #667eea;
         }
 
-        .file-icon {
-            color: #43e97b;
-        }
-
-        .folder-title, .file-title {
+        .folder-title {
             font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 8px;
@@ -133,43 +119,111 @@
             word-break: break-word;
         }
 
-        .folder-count, .file-date {
+        .folder-count {
             color: #666;
             font-size: 0.9rem;
             margin-bottom: 10px;
         }
 
-        .file-details {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.9);
+        /* File List Styles */
+        .files-list {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+
+        .files-list-header {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
             color: white;
-            padding: 15px;
-            transition: all 0.3s ease;
-            opacity: 0;
-            visibility: hidden;
-            border-radius: 0 0 20px 20px;
-            height: 100%;
-        }
-
-        .file-card:hover .file-details {
-            top: 45%;
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .file-detail-item {
+            padding: 20px 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
+            align-items: center;
+            gap: 10px;
         }
 
-        .file-detail-item a {
-            color: #4facfe;
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-item:hover {
+            background: rgba(67, 233, 123, 0.05);
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item-icon {
+            font-size: 1.5rem;
+            color: #43e97b;
+            margin-right: 15px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .file-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-item-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .file-item-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 0.85rem;
+            color: #666;
+            flex-wrap: wrap;
+        }
+
+        .file-item-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-item-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: 15px;
+        }
+
+        .file-item-action {
+            padding: 8px 12px;
+            background: #43e97b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .file-item-action:hover {
+            background: #38d96b;
+            transform: translateY(-1px);
         }
 
         .loading {
@@ -233,13 +287,31 @@
         }
 
         .device-text {
-            max-width: 150px;
+            max-width: 300px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             display: inline-block;
         }
 
+        /* Responsive design for file list */
+        @media (max-width: 768px) {
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .file-item-actions {
+                margin-left: 0;
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .file-item-meta {
+                gap: 15px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -281,47 +353,60 @@
             <div style="font-size: 0.9rem; margin-top: 10px;">API serveringiz ishlab turganiga ishonch hosil qiling</div>
         </div>
 
-        <div v-else class="grid">
-            <div v-for="item in folderItems" :key="getItemKey(item)"
-                 class="folder-card"
-                 @click="selectItem(item)">
-                <div class="folder-icon">
-                    <i class="fas fa-folder"></i>
-                </div>
-                <div class="folder-title">
-                    {{ getItemTitle(item) }}
-                </div>
-                <div class="folder-count">
-                    {{ item.Count }} ta element
+        <div v-else>
+            <!-- Folders Grid -->
+            <div v-if="folderItems.length > 0" class="grid">
+                <div v-for="item in folderItems" :key="getItemKey(item)"
+                     class="folder-card"
+                     @click="selectItem(item)">
+                    <div class="folder-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <div class="folder-title">
+                        {{ getItemTitle(item) }}
+                    </div>
+                    <div class="folder-count">
+                        {{ item.Count }} ta element
+                    </div>
                 </div>
             </div>
 
-            <!-- Fayllar -->
-            <div v-for="file in fileItems" :key="file.Name"
-                 class="file-card">
-                <div class="file-icon">
-                    <i :class="getFileIcon(file.Name)"></i>
+            <!-- Files List -->
+            <div v-if="fileItems.length > 0" class="files-list">
+                <div class="files-list-header">
+                    <i class="fas fa-file-alt"></i>
+                    Fayllar ({{ fileItems.length }} ta)
                 </div>
-                <div class="file-title">{{ getFileName(file) }}</div>
-                <div class="file-date">
-                    <i class="fas fa-calendar"></i> {{ formatDate(file.CreatedAt) }}
-                </div>
-                <div class="file-details">
-                    <div class="file-detail-item">
-                        <span><i class="fas fa-globe"></i> IP manzil:</span>
-                        <span>{{ file.Ip || 'Noma\'lum' }}</span>
+                <div v-for="file in fileItems" :key="file.Name" class="file-item">
+                    <div class="file-item-icon">
+                        <i :class="getFileIcon(file.Name)"></i>
                     </div>
-                    <div class="file-detail-item">
-                        <span><i class="fas fa-weight-hanging"></i> Hajm:</span>
-                        <span>{{ file.Size || 'Noma\'lum' }}</span>
+                    <div class="file-item-info">
+                        <div class="file-item-name">{{ getFileName(file) }}</div>
+                        <div class="file-item-meta">
+                            <div class="file-item-meta-item">
+                                <i class="fas fa-calendar"></i>
+                                <span>{{ formatDate(file.CreatedAt) }}</span>
+                            </div>
+                            <div class="file-item-meta-item" v-if="file.Size">
+                                <i class="fas fa-weight-hanging"></i>
+                                <span>{{ file.Size }}</span>
+                            </div>
+                            <div class="file-item-meta-item" v-if="file.Ip">
+                                <i class="fas fa-globe"></i>
+                                <span>{{ file.Ip }}</span>
+                            </div>
+                            <div class="file-item-meta-item" v-if="file.Device">
+                                <i class="fas fa-desktop"></i>
+                                <span class="device-text">{{ file.Device }}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="file-detail-item">
-                        <span><i class="fas fa-desktop"></i> Qurilma:</span>
-                        <span class="device-text">{{ file.Device || 'Noma\'lum' }}</span>
-                    </div>
-                    <div class="file-detail-item" v-if="file.Url">
-                        <span><i class="fas fa-download"></i> Yuklab olish:</span>
-                        <a :href="file.Url" target="_blank">Fayl</a>
+                    <div class="file-item-actions" v-if="file.Url">
+                        <a :href="file.Url" target="_blank" class="file-item-action">
+                            <i class="fas fa-download"></i>
+                            Yuklab olish
+                        </a>
                     </div>
                 </div>
             </div>
