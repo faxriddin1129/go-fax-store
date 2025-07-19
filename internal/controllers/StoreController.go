@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"microservice/internal/models"
 	"microservice/pkg/env"
@@ -32,6 +33,9 @@ func StoreFile(c *gin.Context) {
 		return
 	}
 
+	sizeInMB := float64(file.Size) / (1024 * 1024)
+	formattedSize := fmt.Sprintf("%.2f MB", sizeInMB)
+
 	ext := strings.ToLower(filepath.Ext(file.Filename))
 	ext = strings.TrimPrefix(ext, ".")
 	allowed := utils.InArray(allowedExtensions, ext)
@@ -52,7 +56,7 @@ func StoreFile(c *gin.Context) {
 	year := now.Format("2006")
 	month := now.Format("01")
 	day := now.Format("02")
-	slag := utils.GenerateToken(year + month + day)
+	name := file.Filename
 
 	loadUrl := env.GetEnv("BASE_URL")
 	url := loadUrl + "/" + fullPath
@@ -65,8 +69,9 @@ func StoreFile(c *gin.Context) {
 		Day:    day,
 		Ip:     ip,
 		Device: device,
-		Slag:   slag,
+		Name:   name,
 		Url:    url,
+		Size:   formattedSize,
 	}
 
 	err = utils.DB.Create(&newFile).Error

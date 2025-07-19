@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoFax Store - Fayl Yuklash</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .navbar {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .nav-item {
+            cursor: pointer;
+            padding: 10px 20px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .nav-item.active {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .upload-container {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .upload-area.dragover {
+            border-color: #43e97b;
+            background: rgba(67, 233, 123, 0.1);
+        }
+
+        .upload-area.error {
+            border-color: #ff4757;
+            background: rgba(255, 71, 87, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .file-info.show {
+            display: block;
+        }
+
+        .file-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: #43e97b;
+        }
+
+        .file-meta {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-size {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .upload-button {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .upload-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .upload-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .clear-button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .clear-button:hover {
+            background: #ff3742;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: rgba(67, 233, 123, 0.1);
+            color: #27ae60;
+            border: 1px solid rgba(67, 233, 123, 0.3);
+        }
+
+        .message.error {
+            background: rgba(255, 71, 87, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(255, 71, 87, 0.3);
+        }
+
+        .allowed-formats {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .allowed-formats h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .format-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .format-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cloud-upload-alt"></i> GoFax Store</h1>
+            <p>Fayllaringizni xavfsiz yuklang</p>
+        </div>
+
+        <!-- Navigation -->
+        <div class="navbar">
+            <a href="index.html" class="nav-item">
+                <i class="fas fa-folder-open"></i>
+                Fayllarni Ko'rish
+            </a>
+            <a href="upload.html" class="nav-item active">
+                <i class="fas fa-cloud-upload-alt"></i>
+                Fayl Yuklash
+            </a>
+        </div>
+
+        <div class="upload-container">
+            <!-- Success/Error Messages -->
+            <div v-if="message" :class="['message', messageType]">
+                <i :class="messageType === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'"></i>
+                {{ message }}
+            </div>
+
+            <!-- Upload Area -->
+            <div
+                    :class="['upload-area', { dragover: isDragOver, error: hasError }]"
+                    @click="triggerFileInput"
+                    @dragover.prevent="handleDragOver"
+                    @dragleave.prevent="handleDragLeave"
+                    @drop.prevent="handleDrop"
+            >
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">
+                    Faylni bu yerga sudrab tashlang yoki bosing
+                </div>
+                <div class="upload-subtext">
+                    Maksimum hajm: 10 MB
+                </div>
+            </div>
+
+            <input
+                    type="file"
+                    ref="fileInput"
+                    class="file-input"
+                    @change="handleFileSelect"
+                    :accept="allowedFormats"
+            >
+
+            <!-- File Info -->
+            <div :class="['file-info', { show: selectedFile }]">
+                <div class="file-details">
+                    <div class="file-icon">
+                        <i :class="getFileIcon(selectedFile?.name)"></i>
+                    </div>
+                    <div class="file-meta">
+                        <div class="file-name">{{ selectedFile?.name }}</div>
+                        <div class="file-size">{{ formatFileSize(selectedFile?.size) }}</div>
+                    </div>
+                    <button @click="clearFile" class="clear-button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="progress-bar" v-if="isUploading">
+                    <div class="progress-fill" :style="{ width: uploadProgress + '%' }"></div>
+                </div>
+
+                <button
+                        @click="uploadFile"
+                        :disabled="!selectedFile || isUploading"
+                        class="upload-button"
+                >
+                    <span v-if="isUploading" class="loading"></span>
+                    <i v-else class="fas fa-upload"></i>
+                    {{ isUploading ? 'Yuklanmoqda...' : 'Faylni Yuklash' }}
+                </button>
+            </div>
+
+            <!-- Allowed Formats -->
+            <div class="allowed-formats">
+                <h3><i class="fas fa-info-circle"></i> Ruxsat etilgan formatlar:</h3>
+                <div class="format-list">
+                    <span class="format-tag">JPG</span>
+                    <span class="format-tag">PNG</span>
+                    <span class="format-tag">GIF</span>
+                    <span class="format-tag">BMP</span>
+                    <span class="format-tag">WEBP</span>
+                    <span class="format-tag">PDF</span>
+                    <span class="format-tag">DOC</span>
+                    <span class="format-tag">DOCX</span>
+                    <span class="format-tag">XLSX</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                selectedFile: null,
+                isDragOver: false,
+                isUploading: false,
+                uploadProgress: 0,
+                message: '',
+                messageType: '',
+                hasError: false,
+                allowedFormats: '.jpg,.jpeg,.png,.gif,.bmp,.webp,.pdf,.doc,.docx,.xlsx',
+                allowedExtensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'pdf', 'doc', 'docx', 'xlsx'],
+                maxFileSize: 10 * 1024 * 1024, // 10 MB
+                uploadUrl: 'http://localhost:8081/store'
+            }
+        },
+        methods: {
+            triggerFileInput() {
+                this.$refs.fileInput.click();
+            },
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                this.processFile(file);
+            },
+            handleDragOver(event) {
+                this.isDragOver = true;
+            },
+            handleDragLeave(event) {
+                this.isDragOver = false;
+            },
+            handleDrop(event) {
+                this.isDragOver = false;
+                const file = event.dataTransfer.files[0];
+                this.processFile(file);
+            },
+            processFile(file) {
+                this.clearMessage();
+                this.hasError = false;
+
+                if (!file) return;
+
+                // Fayl hajmini tekshirish
+                if (file.size > this.maxFileSize) {
+                    this.showError('Fayl hajmi 10 MB dan oshmasligi kerak!');
+                    return;
+                }
+
+                // Fayl formatini tekshirish
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (!this.allowedExtensions.includes(fileExtension)) {
+                    this.showError('Bu fayl formati ruxsat etilmagan!');
+                    return;
+                }
+
+                this.selectedFile = file;
+                console.log('Fayl tanlandi:', file.name, this.formatFileSize(file.size));
+            },
+            async uploadFile() {
+                if (!this.selectedFile) return;
+
+                this.isUploading = true;
+                this.uploadProgress = 0;
+                this.clearMessage();
+
+                try {
+                    const formData = new FormData();
+                    formData.append('file', this.selectedFile);
+
+                    const xhr = new XMLHttpRequest();
+
+                    // Progress tracking
+                    xhr.upload.addEventListener('progress', (event) => {
+                        if (event.lengthComputable) {
+                            this.uploadProgress = Math.round((event.loaded / event.total) * 100);
+                        }
+                    });
+
+                    // Promise wrapper for XMLHttpRequest
+                    const uploadPromise = new Promise((resolve, reject) => {
+                        xhr.onload = () => {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                resolve(xhr.response);
+                            } else {
+                                reject(new Error(`HTTP Error: ${xhr.status}`));
+                            }
+                        };
+                        xhr.onerror = () => reject(new Error('Network Error'));
+                    });
+
+                    xhr.open('POST', this.uploadUrl);
+                    xhr.send(formData);
+
+                    await uploadPromise;
+
+                    this.showSuccess('Fayl muvaffaqiyatli yuklandi!');
+                    this.clearFile();
+
+                } catch (error) {
+                    console.error('Upload xatoligi:', error);
+                    this.showError('Fayl yuklashda xatolik yuz berdi: ' + error.message);
+                } finally {
+                    this.isUploading = false;
+                    this.uploadProgress = 0;
+                }
+            },
+            clearFile() {
+                this.selectedFile = null;
+                this.$refs.fileInput.value = '';
+                this.uploadProgress = 0;
+            },
+            showSuccess(message) {
+                this.message = message;
+                this.messageType = 'success';
+                setTimeout(() => this.clearMessage(), 5000);
+            },
+            showError(message) {
+                this.message = message;
+                this.messageType = 'error';
+                this.hasError = true;
+                setTimeout(() => {
+                    this.clearMessage();
+                    this.hasError = false;
+                }, 5000);
+            },
+            clearMessage() {
+                this.message = '';
+                this.messageType = '';
+            },
+            formatFileSize(bytes) {
+                if (!bytes) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            },
+            getFileIcon(fileName) {
+                if (!fileName) return 'fas fa-file';
+
+                const ext = fileName.split('.').pop().toLowerCase();
+                const iconMap = {
+                    'pdf': 'fas fa-file-pdf',
+                    'doc': 'fas fa-file-word', 'docx': 'fas fa-file-word',
+                    'xlsx': 'fas fa-file-excel',
+                    'jpg': 'fas fa-file-image', 'jpeg': 'fas fa-file-image',
+                    'png': 'fas fa-file-image', 'gif': 'fas fa-file-image',
+                    'bmp': 'fas fa-file-image', 'webp': 'fas fa-file-image'
+                };
+                return iconMap[ext] || 'fas fa-file';
+            }
+        }
+    }).mount('#app');
+</script>
+</body>
+</html>

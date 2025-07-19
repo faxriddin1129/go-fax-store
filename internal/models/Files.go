@@ -2,7 +2,6 @@ package models
 
 import (
 	"gorm.io/gorm"
-	"log"
 	"microservice/pkg/utils"
 )
 
@@ -14,70 +13,90 @@ type Files struct {
 	Ip     string `json:"Ip" gorm:"type:varchar(255)"`
 	Device string `json:"Device"`
 	Url    string `json:"Url" gorm:"type:varchar(255)"`
-	Slag   string `json:"Slag" gorm:"type:varchar(255)"`
+	Name   string `json:"Name" gorm:"type:varchar(255)"`
+	Count  int    `json:"Count"`
+	Size   string `json:"Size"`
 }
 
 func (Files) TableName() string {
 	return "files"
 }
 
-func GetAllFiles(year, month, day string) []Files {
+func GetAllFiles(year, month, day string) interface{} {
 	var data []Files
 	query := utils.DB
 
-	if year != "" {
-		query = query.Where("year = ?", year)
-	}
+	queryType := ""
 
-	if month != "" {
-		query = query.Where("month = ?", month)
-	}
-
-	if day != "" {
-		query = query.Where("day = ?", day)
+	if year == "" && month == "" && day == "" {
+		query = query.Select("year, COUNT(DISTINCT month) as count").Group("year").Order("year")
+		queryType = "year"
+	} else if year != "" && month == "" && day == "" {
+		queryType = "month"
+		query = query.Where("year = ?", year).Select("month, COUNT(DISTINCT day) as count").Group("month").Order("CAST(month AS INTEGER)")
+	} else if year != "" && month != "" && day == "" {
+		queryType = "day"
+		query = query.Where("year = ? AND month = ?", year, month).Select("day, COUNT(*) as count").Group("day").Order("day::INTEGER")
+	} else {
+		queryType = "file"
+		query = query.Where("year = ? AND month = ? AND day = ?", year, month, day)
 	}
 
 	result := query.Find(&data)
 	if result.Error != nil {
-		log.Printf("Error fetching files: %v", result.Error)
-		return nil
+		return []Files{}
 	}
 
-	return data
-}
+	sendData := make([]map[string]interface{}, 0)
 
-type TreeResponse struct {
-	Years []YearNode `json:"years"`
-}
+	if queryType == "year" {
+		for _, d := range data {
+			sendData = append(sendData, map[string]interface{}{
+				"Year":  d.Year,
+				"Count": d.Count,
+				"Type":  "Year",
+			})
+		}
+	}
 
-type YearNode struct {
-	Year   string      `json:"year"`
-	Months []MonthNode `json:"months"`
-}
+	if queryType == "month" {
+		for _, d := range data {
+			sendData = append(sendData, map[string]interface{}{
+				"Month": d.Month,
+				"Count": d.Count,
+				"Type":  "Month",
+			})
+		}
+	}
 
-type MonthNode struct {
-	Month string    `json:"month"`
-	Days  []DayNode `json:"days"`
-}
+	if queryType == "day" {
+		for _, d := range data {
+			sendData = append(sendData, map[string]interface{}{
+				"Day":   d.Day,
+				"Count": d.Count,
+				"Type":  "Day",
+			})
+		}
+	}
 
-type DayNode struct {
-	Day   string `json:"day"`
-	Count int    `json:"count"`
-}
+	if queryType == "file" {
+		for _, d := range data {
+			sendData = append(sendData, map[string]interface{}{
+				"CreatedAt": d.CreatedAt,
+				"UpdatedAt": d.UpdatedAt,
+				"Year":      d.Year,
+				"Month":     d.Month,
+				"Day":       d.Day,
+				"Ip":        d.Ip,
+				"Device":    d.Device,
+				"Url":       d.Url,
+				"Name":      d.Name,
+				"Count":     d.Count,
+				"Size":      d.Size,
+				"Type":      "File",
+			})
+		}
+	}
 
-type GroupedResult struct {
-	Year  string `json:"year"`
-	Month string `json:"month"`
-	Day   string `json:"day"`
-	Count int    `json:"count"`
-}
-
-func GetFilesTree() interface{} {
-
-	results := utils.DB.Model(&Files{}).
-		Select("year, month, day, COUNT(*) as count").
-		Group("year, month, day").
-		Order("CAST(year AS UNSIGNED), CAST(month AS UNSIGNED), CAST(day AS UNSIGNED)")
-
-	return results
+	return sendData
 }
