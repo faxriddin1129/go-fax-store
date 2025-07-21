@@ -72,6 +72,7 @@ func StoreFile(c *gin.Context) {
 		Name:   name,
 		Url:    url,
 		Size:   formattedSize,
+		Format: ext,
 	}
 
 	err = utils.DB.Create(&newFile).Error

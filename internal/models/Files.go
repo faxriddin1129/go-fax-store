@@ -16,6 +16,7 @@ type Files struct {
 	Name   string `json:"Name" gorm:"type:varchar(255)"`
 	Count  int    `json:"Count"`
 	Size   string `json:"Size"`
+	Format string `json:"Format"`
 }
 
 func (Files) TableName() string {
