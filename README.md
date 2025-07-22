@@ -108,3 +108,20 @@ sudo systemctl stop myapp
 ```
 sudo systemctl restart myapp
 ```
+## DOCKER DEPLOY
+Build
+```
+docker-compose build --no-cache
+```
+Run
+```
+docker-compose up -d
+```
+Logs
+```
+docker-compose logs -f app
+```
+Check .env
+```
+docker-compose --env-file .env config
+```

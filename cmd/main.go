@@ -54,7 +54,7 @@ func main() {
 	config.RegisterRoutes(r)
 
 	// Start server
-	port := env.GetEnv("PROJECT_PORT")
+	port := ":" + env.GetEnv("PROJECT_PORT")
 	if err := r.Run(port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
