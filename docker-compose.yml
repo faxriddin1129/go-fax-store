@@ -5,9 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: go_microservice
+    container_name: GoFaxStore
     ports:
-      - "8080:8080"
+      - "8080:8080"  # bu PORT .env fayldan ham o'qilsa bo'ladi
     depends_on:
       - db
     environment:
@@ -16,12 +16,11 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
-    volumes:
-      - .:/app
     restart: always
+
   db:
     image: postgres:15
-    container_name: pg_microservice
+    container_name: GoFaxStorePG
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
@@ -30,5 +29,6 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
 volumes:
   pgdata:
