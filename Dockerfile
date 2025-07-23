@@ -26,6 +26,8 @@ RUN go build -ldflags="-w -s -X main.version=1.0.0" -a -installsuffix cgo -o mai
 
 FROM alpine:latest
 
+COPY .env .env
+
 RUN apk --no-cache add ca-certificates tzdata && \
     addgroup -g 1001 -S appgroup && \
     adduser -u 1001 -S appuser -G appgroup
@@ -41,6 +43,6 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD pgrep main || exit 1
 
-EXPOSE ${PROJECT_PORT}
+EXPOSE 8081
 
 CMD ["./main"]
