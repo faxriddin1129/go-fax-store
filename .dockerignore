@@ -1,17 +1,1 @@
-.git
-.gitignore
-README.md
-*.md
-.env*
-.DS_Store
-Thumbs.db
-node_modules
-*.log
-.vscode
 .idea
-vendor/
-tmp/
-*.tmp
-*.swp
-*.swo
-*~

@@ -5,6 +5,9 @@ services:
       dockerfile: Dockerfile
       args:
         BUILDKIT_INLINE_CACHE: 1
+      cache_from:
+        - golang:1.23.2-alpine
+        - alpine:latest
     container_name: GoFaxStore
     ports:
       - "8081:8081"
@@ -20,6 +23,7 @@ services:
       - DB_PASSWORD=1129
       - DB_NAME=store
       - PROJECT_PORT=8081
+      - TZ=Asia/Tashkent  # Timezone o'rnating
     restart: unless-stopped
     networks:
       - app-network
@@ -34,6 +38,16 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    # Security enhancements
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
 
   db:
     image: postgres:15-alpine
@@ -43,8 +57,9 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1129
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+      - TZ=Asia/Tashkent
     ports:
-      - "5432:5432"
+      - "5432:5432"  # Production'da buni olib tashlash tavsiya etiladi
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -56,12 +71,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
+      start_period: 30s  # PostgreSQL init uchun ko'proq vaqt
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+    # Security enhancements
+    security_opt:
+      - no-new-privileges:true
+    # PostgreSQL performance tuning
     command: >
       postgres
       -c shared_preload_libraries=pg_stat_statements
@@ -72,6 +91,11 @@ services:
       -c checkpoint_completion_target=0.9
       -c wal_buffers=16MB
       -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c seq_page_cost=1.0
+      -c log_statement=all
+      -c log_duration=on
+      -c log_min_duration_statement=1000
 
 volumes:
   pgdata:
@@ -80,3 +104,6 @@ volumes:
 networks:
   app-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"microservice/internal/models"
-	"microservice/pkg/env"
 	"microservice/pkg/utils"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -58,7 +58,7 @@ func StoreFile(c *gin.Context) {
 	day := now.Format("02")
 	name := file.Filename
 
-	loadUrl := env.GetEnv("BASE_URL")
+	loadUrl := os.Getenv("BASE_URL")
 	url := loadUrl + "/" + fullPath
 
 	ip := c.ClientIP()

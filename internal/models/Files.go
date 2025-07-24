@@ -83,6 +83,7 @@ func GetAllFiles(year, month, day string) interface{} {
 	if queryType == "file" {
 		for _, d := range data {
 			sendData = append(sendData, map[string]interface{}{
+				"Id":        d.ID,
 				"CreatedAt": d.CreatedAt,
 				"UpdatedAt": d.UpdatedAt,
 				"Year":      d.Year,

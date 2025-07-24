@@ -3,26 +3,29 @@ package main
 import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"log"
 	"microservice/internal/config"
 	"microservice/internal/migrations"
 	"microservice/pkg/bootstrap"
-	"microservice/pkg/env"
 	"microservice/pkg/utils"
+	"os"
 	"time"
 )
 
 func init() {
 	location, _ := time.LoadLocation("Asia/Tashkent")
 	time.Local = location
+
 }
 
 func main() {
+
 	// LOAD ENVIRONMENTS
-	env.LoadEnv()
+	LoadEnv()
 
 	// GIN MODE
-	gin.SetMode(env.GetEnv("GIN_MODE"))
+	gin.SetMode(os.Getenv("GIN_MODE"))
 
 	// GIN DEFAULT
 	r := gin.Default()
@@ -54,8 +57,15 @@ func main() {
 	config.RegisterRoutes(r)
 
 	// Start server
-	port := ":" + env.GetEnv("PROJECT_PORT")
+	port := ":" + os.Getenv("PROJECT_PORT")
 	if err := r.Run(port); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
+	}
+}
+
+func LoadEnv() {
+	if err := godotenv.Load(); err != nil {
+		log.Println(".env file not found, using system env variables...")
+		log.Fatal(err)
 	}
 }

@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
-	"microservice/pkg/env"
+	"os"
 	"sync"
 
 	"gorm.io/driver/postgres"
@@ -35,11 +35,11 @@ func GetDB() *gorm.DB {
 }
 
 func buildDSN() string {
-	host := env.GetEnv("DB_HOST")
-	user := env.GetEnv("DB_USER")
-	password := env.GetEnv("DB_PASSWORD")
-	dbname := env.GetEnv("DB_NAME")
-	port := env.GetEnv("DB_PORT")
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	password := os.Getenv("DB_PASSWORD")
+	dbname := os.Getenv("DB_NAME")
+	port := os.Getenv("DB_PORT")
 
 	if host == "" || user == "" || password == "" || dbname == "" || port == "" {
 		fmt.Println(host)
