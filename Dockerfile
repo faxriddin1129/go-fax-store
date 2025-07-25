@@ -3,6 +3,7 @@ FROM golang:1.24 AS builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
+
 RUN go mod download
 COPY . .
 
@@ -26,8 +27,7 @@ COPY --from=builder /app/app .
 COPY --from=builder /app/.env .
 
 # Create logs directory and set permissions
-RUN mkdir -p /app/storage/logs && \
-    chown -R appuser:appgroup /app
+RUN chown -R appuser:appgroup /app
 
     
 USER appuser

@@ -6,5 +6,5 @@ import (
 )
 
 func Welcome(c *gin.Context) {
-	utils.RespondJson(c, nil, 200, "Welcome to the GOFAX STORE")
+	utils.RespondJson(c, nil, 200, "Welcome to the GOFAX STORE 2")
 }
