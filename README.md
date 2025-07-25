@@ -111,11 +111,15 @@ sudo systemctl restart myapp
 ## DOCKER DEPLOY
 Build
 ```
-docker-compose build --no-cache
+docker-compose up --build -d
 ```
 Run
 ```
-docker-compose up -d
+docker-compose up
+```
+Stop
+```
+docker-compose down
 ```
 Logs
 ```

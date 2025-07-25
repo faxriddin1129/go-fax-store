@@ -8,9 +8,9 @@ services:
       cache_from:
         - golang:1.24-alpine
         - alpine:latest
-    container_name: GoFaxStore
+    container_name: ${APP_NAME}
     ports:
-      - "8081:8081"
+      - "${PROJECT_PORT}:8081"
     depends_on:
       db:
         condition: service_healthy
@@ -18,11 +18,11 @@ services:
       - .env
     environment:
       - DB_HOST=db
-      - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=1129
-      - DB_NAME=store
-      - PROJECT_PORT=8081
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - PROJECT_PORT=${PROJECT_PORT}
       - TZ=Asia/Tashkent
     restart: unless-stopped
     networks:
@@ -55,9 +55,9 @@ services:
     image: postgres:15-alpine
     container_name: GoFaxStorePG
     environment:
-      - POSTGRES_DB=store
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1129
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
       - TZ=Asia/Tashkent
     ports:

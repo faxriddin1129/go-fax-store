@@ -32,5 +32,5 @@ RUN chown -R appuser:appgroup /app
     
 USER appuser
 
-EXPOSE 8081
+EXPOSE $PROJECT_PORT
 CMD ["./app"]
