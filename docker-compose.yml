@@ -6,7 +6,7 @@ services:
       args:
         BUILDKIT_INLINE_CACHE: 1
       cache_from:
-        - golang:1.23.2-alpine
+        - golang:1.24-alpine
         - alpine:latest
     container_name: GoFaxStore
     ports:
@@ -23,16 +23,16 @@ services:
       - DB_PASSWORD=1129
       - DB_NAME=store
       - PROJECT_PORT=8081
-      - TZ=Asia/Tashkent  # Timezone o'rnating
+      - TZ=Asia/Tashkent
     restart: unless-stopped
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+#    healthcheck:
+#      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081"]
+#      interval: 60s
+#      timeout: 10s
+#      retries: 3
+#      start_period: 40s
     logging:
       driver: "json-file"
       options:
@@ -41,9 +41,10 @@ services:
     # Security enhancements
     security_opt:
       - no-new-privileges:true
-    read_only: true
+    #read_only: true
     tmpfs:
       - /tmp
+      - /app/storage/logs
     cap_drop:
       - ALL
     cap_add:
@@ -59,7 +60,7 @@ services:
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
       - TZ=Asia/Tashkent
     ports:
-      - "5432:5432"  # Production'da buni olib tashlash tavsiya etiladi
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
@@ -71,16 +72,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s  # PostgreSQL init uchun ko'proq vaqt
+      start_period: 30s
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    # Security enhancements
     security_opt:
       - no-new-privileges:true
-    # PostgreSQL performance tuning
     command: >
       postgres
       -c shared_preload_libraries=pg_stat_statements
@@ -96,6 +95,7 @@ services:
       -c log_statement=all
       -c log_duration=on
       -c log_min_duration_statement=1000
+      -c timezone='Asia/Tashkent'
 
 volumes:
   pgdata:

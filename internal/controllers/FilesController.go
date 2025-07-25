@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"microservice/internal/models"
-	"microservice/pkg/utils"
+	"gofax-store/internal/models"
+	"gofax-store/pkg/utils"
 )
 
 func GetAllFiles(c *gin.Context) {

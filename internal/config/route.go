@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/gin-gonic/gin"
-	"microservice/routes"
+	"gofax-store/routes"
 )
 
 func RegisterRoutes(r *gin.Engine) {

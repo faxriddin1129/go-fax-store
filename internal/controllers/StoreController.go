@@ -3,8 +3,8 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"microservice/internal/models"
-	"microservice/pkg/utils"
+	"gofax-store/internal/models"
+	"gofax-store/pkg/utils"
 	"os"
 	"path/filepath"
 	"strings"

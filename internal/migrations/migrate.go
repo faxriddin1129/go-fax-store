@@ -1,8 +1,8 @@
 package migrations
 
 import (
+	"gofax-store/internal/models"
 	"gorm.io/gorm"
-	"microservice/internal/models"
 )
 
 func MigrateAll(db *gorm.DB) error {

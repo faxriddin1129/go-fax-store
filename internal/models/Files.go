@@ -1,8 +1,8 @@
 package models
 
 import (
+	"gofax-store/pkg/utils"
 	"gorm.io/gorm"
-	"microservice/pkg/utils"
 )
 
 type Files struct {
